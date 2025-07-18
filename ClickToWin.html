@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Click to Win Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f0f0;
+      text-align: center;
+      padding: 40px;
+    }
+
+    .container {
+      background: #fff;
+      padding: 30px;
+      max-width: 400px;
+      margin: auto;
+      border-radius: 10px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.1);
+    }
+
+    input, button {
+      padding: 10px;
+      margin: 10px;
+      width: 80%;
+      font-size: 16px;
+    }
+
+    #clickBtn {
+      background: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 18px;
+      margin-top: 20px;
+      cursor: pointer;
+      display: none;
+    }
+
+    #clickBtn:hover {
+      background: #45a049;
+    }
+
+    #leaderboard {
+      margin-top: 30px;
+      text-align: left;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Click to Win!</h1>
+    
+    <input type="text" id="playerName" placeholder="Enter your name" />
+    <button onclick="startGame()">Start Game</button>
+
+    <h2 id="timer">Time: 10</h2>
+    <h3 id="score">Score: 0</h3>
+    <button id="clickBtn" onclick="incrementScore()">Click Me!</button>
+
+    <div id="leaderboard">
+      <h2>🏆 Leaderboard</h2>
+      <ol id="leaderboardList"></ol>
+    </div>
+  </div>
+
+  <script>
+    let timeLeft = 10;
+    let score = 0;
+    let timerInterval;
+
+    function startGame() {
+      const name = document.getElementById("playerName").value.trim();
+      if (!name) {
+        alert("Please enter your name!");
+        return;
+      }
+
+      score = 0;
+      timeLeft = 10;
+      document.getElementById("score").innerText = "Score: 0";
+      document.getElementById("timer").innerText = "Time: 10";
+      document.getElementById("clickBtn").style.display = "inline-block";
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        document.getElementById("timer").innerText = "Time: " + timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          document.getElementById("clickBtn").style.display = "none";
+          saveScore(name, score);
+          showLeaderboard();
+        }
+      }, 1000);
+    }
+
+    function incrementScore() {
+      score++;
+      document.getElementById("score").innerText = "Score: " + score;
+    }
+
+    function saveScore(name, score) {
+      let leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      leaderboard.push({ name, score });
+      leaderboard.sort((a, b) => b.score - a.score);
+      leaderboard = leaderboard.slice(0, 5); // keep top 5
+      localStorage.setItem("leaderboard", JSON.stringify(leaderboard));
+    }
+
+    function showLeaderboard() {
+      const leaderboard = JSON.parse(localStorage.getItem("leaderboard")) || [];
+      const list = document.getElementById("leaderboardList");
+      list.innerHTML = "";
+      leaderboard.forEach((entry, index) => {
+        const li = document.createElement("li");
+        li.textContent = `${entry.name} - ${entry.score} clicks`;
+        list.appendChild(li);
+      });
+    }
+
+    // Show leaderboard on page load
+    showLeaderboard();
+  </script>
+</body>
+</html>
